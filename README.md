@@ -1,5 +1,7 @@
 # KidsTimes
 KidsTimes Sample Source
-# cd KidsTimes
-# pip install -t ./ -r requirements.txt
+
+# Setup
+cd KidsTimes
+pip install -t ./ -r requirements.txt
 
