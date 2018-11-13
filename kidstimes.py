@@ -28,8 +28,9 @@ HELP_REPROMPT = "What can I help you with?"
 EXCEPTION_MESSAGE = "Sorry. I cannot help you with that."
 DEVICE_NOT_SUPPORTED = "Sorry, this skill is not supported on this device"
 
+CATEGORIES = ["aha", "culture", "expression", "find it", "focus", "lets go", "national", "people", "photo", "picture", "science", "together", "wonders", "world"]
+
 BUCKET_NAME = "kidstimes"
-SAMPLE_FILE = "World/469.wav"
 
 ## System handlers
 # Standard requests
@@ -62,25 +63,6 @@ class CheckAudioInterfaceHandler(AbstractRequestHandler):
         logger.info("In CheckAudioInterfaceHandler")
         handler_input.response_builder.speak(DEVICE_NOT_SUPPORTED).set_should_end_session(True)
         return handler_input.response_builder.response
-
-## Exception handler
-class CatchAllExceptionHandler(AbstractExceptionHandler):
-    def can_handle(self, handler_input, exception):
-        return True
-
-    def handle(self, handler_input, exception):
-        logger.error(exception, exc_info=True)
-        handler_input.response_builder.speak(EXCEPTION_MESSAGE).ask(HELP_REPROMPT)
-        return handler_input.response_builder.response
-
-## Logger interceptors
-class RequestLogger(AbstractRequestInterceptor):
-    def process(self, handler_input):
-        logger.debug("Alexa Request: {}".format(handler_input.request_envelope.request))
-
-class ResponseLogger(AbstractResponseInterceptor):
-    def process(self, handler_input, response):
-        logger.debug("Alexa Response: {}".format(response))
 
 ## Built-In Intents
 class HelpIntentHandler(AbstractRequestHandler):
@@ -265,14 +247,20 @@ class PlayKidsTimesHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         logger.info("Play Kids Times")
-        url = s3.generate_presigned_url(
+        slot = handler_input.request_envelope.request.intent.slots['type']
+        type = slot.value
+
+        if type in CATEGORIES:
+            url = s3.generate_presigned_url(
                 ClientMethod='get_object',
                 Params={
                     'Bucket': BUCKET_NAME,
-                    'Key': SAMPLE_FILE
-                    }
-                )
-        return play(handler_input.response_builder, url)
+                    'Key': '{}/469.wav'.format(type)
+                }
+            )
+            return play(handler_input.response_builder, url)
+        else:
+            return handler_input.response_builder.speak("I don't understanding {}".format(type)).response
 
 from ask_sdk_model.interfaces.audioplayer import (PlayDirective, PlayBehavior, AudioItem, Stream, StopDirective)
 def play(response_builder, url):
@@ -325,6 +313,26 @@ sb.add_request_handler(PreviousCommandIssuedHandler())
 sb.add_request_handler(PlayCommandIssuedHandler())
 
 sb.add_request_handler(PlayKidsTimesHandler())
+
+
+## Exception handler
+class CatchAllExceptionHandler(AbstractExceptionHandler):
+    def can_handle(self, handler_input, exception):
+        return True
+
+    def handle(self, handler_input, exception):
+        logger.error(exception, exc_info=True)
+        handler_input.response_builder.speak(EXCEPTION_MESSAGE).ask(HELP_REPROMPT)
+        return handler_input.response_builder.response
+
+## Logger interceptors
+class RequestLogger(AbstractRequestInterceptor):
+    def process(self, handler_input):
+        logger.debug("Alexa Request: {}".format(handler_input.request_envelope.request))
+
+class ResponseLogger(AbstractResponseInterceptor):
+    def process(self, handler_input, response):
+        logger.debug("Alexa Response: {}".format(response))
 
 # Exception handlers
 sb.add_exception_handler(CatchAllExceptionHandler())
