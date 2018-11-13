@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from ask_sdk_core.skill_builder import SkillBuilder
-#from ask_sdk.standard import StandardSkillBuilder
+from ask_sdk.standard import StandardSkillBuilder
 from ask_sdk_core.dispatch_components import (AbstractRequestHandler, AbstractExceptionHandler,
         AbstractRequestInterceptor, AbstractResponseInterceptor)
 from ask_sdk_core.utils import is_request_type, is_intent_name
@@ -30,6 +29,7 @@ DEVICE_NOT_SUPPORTED = "Sorry, this skill is not supported on this device"
 
 CATEGORIES = ["aha", "culture", "expression", "find it", "focus", "lets go", "national", "people", "photo", "picture", "science", "together", "wonders", "world"]
 
+TABLE_NAME = "kidstimes"
 BUCKET_NAME = "kidstimes"
 
 ## System handlers
@@ -277,8 +277,7 @@ def stop(response_builder):
     response_builder.add_directive(StopDirective())
     return response_builder.response
 
-sb = SkillBuilder()
-#sb = StandardSkillBuilder(table_name=data.DYNAMODB_TABLE_NAME, auto_create_table=True)
+sb = StandardSkillBuilder(table_name=TABLE_NAME, auto_create_table=True)
 
 # ############# REGISTER HANDLERS #####################
 # Handlers
@@ -330,16 +329,39 @@ class RequestLogger(AbstractRequestInterceptor):
     def process(self, handler_input):
         logger.debug("Alexa Request: {}".format(handler_input.request_envelope.request))
 
+class LoadPersistenceAttributesRequestInterceptor(AbstractRequestInterceptor):
+    def process(self, handler_input):
+        persistence_attr = handler_input.attributes_manager.persistent_attributes
+        if len(persistence_attr) == 0:
+            persistence_attr["playback_setting"] = {
+                    "loop": False
+                    }
+            persistence_attr["playback_info"] = {
+                    "session": None,
+                    "weeks": 0,
+                    "offset_in_ms": 0,
+                    }
+        else:
+            playback_info = persistence_attr.get("playback_info")
+            playback_info["offset_in_ms"] = int(playback_info.get("offset_in_ms"))
+
+
 class ResponseLogger(AbstractResponseInterceptor):
     def process(self, handler_input, response):
         logger.debug("Alexa Response: {}".format(response))
+
+class SavePersistenceAttributesResponseInterceptor(AbstractResponseInterceptor):
+    def process(self, handler_input, response):
+        handler_input.attributes_manager.save_persistent_attributes()
 
 # Exception handlers
 sb.add_exception_handler(CatchAllExceptionHandler())
 
 # Interceptors
 sb.add_global_request_interceptor(RequestLogger())
+sb.add_global_request_interceptor(LoadPersistenceAttributesRequestInterceptor())
 sb.add_global_response_interceptor(ResponseLogger())
+sb.add_global_response_interceptor(SavePersistenceAttributesResponseInterceptor())
 
 # AWS Lambda handler
 handler = sb.lambda_handler()
