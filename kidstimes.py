@@ -4,7 +4,7 @@ from __future__ import print_function
 from ask_sdk_core.skill_builder import SkillBuilder
 #from ask_sdk.standard import StandardSkillBuilder
 from ask_sdk_core.dispatch_components import (AbstractRequestHandler, AbstractExceptionHandler,
-                                              AbstractRequestInterceptor, AbstractResponseInterceptor)
+        AbstractRequestInterceptor, AbstractResponseInterceptor)
 from ask_sdk_core.utils import is_request_type, is_intent_name
 from ask_sdk_core.handler_input import HandlerInput
 
@@ -117,7 +117,7 @@ class StopIntentHandler(AbstractRequestHandler):
         logger.info("In StopIntentHandler")
 
         return stop(handler_input.response_builder)
-        
+
 class NavigateHomeIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("AMAZON.NavigateHomeIntent")(handler_input)
@@ -150,28 +150,28 @@ class LoopOffIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         logger.info("In LoopOffIntentHandler")
-        
+
 class LoopOnIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("AMAZON.LoopOnIntent")(handler_input)
 
     def handle(self, handler_input):
         logger.info("In LoopOnIntentHandler")
-        
+
 class NextIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("AMAZON.NextIntent")(handler_input)
 
     def handle(self, handler_input):
         logger.info("In NextIntentHandler")
-        
+
 class PreviousIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("AMAZON.PreviousIntent")(handler_input)
 
     def handle(self, handler_input):
         logger.info("In PreviousIntentHandler")
-        
+
 class RepeatIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_intent_name("AMAZON.RepeatIntent")(handler_input)
@@ -197,41 +197,41 @@ class StartOverIntentHandler(AbstractRequestHandler):
 class PlaybackStartedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("AudioPlayer.PlaybackStarted")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In PlaybackStartedHandler")
         return handler_input.response_builder.response
-        
+
 class PlaybackFinishedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("AudioPlayer.PlaybackFinished")(handler_input)
-    
+
     def handle(self, handler_input):
-        logger.info("In PlaybackFinishedHandler") 
+        logger.info("In PlaybackFinishedHandler")
         return handler_input.response_builder.response
-       
+
 class PlaybackStoppedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("AudioPlayer.PlaybackStopped")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In PlaybackStoppedHandler")
         # will save playback info in db
         # handler_input.request_envelope.request.offset_in_milliseconds
         return handler_input.response_builder.response
-        
+
 class PlaybackNearlyFinishedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("AudioPlayer.PlaybackNearlyFinished")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In PlaybackNearlyFinished")
         return handler_input.response_builder.response
-        
+
 class PlaybackFailedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("AudioPlayer.PlaybackFailed")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In PlaybackFailedHandler")
         return handler_input.response_builder.response
@@ -240,21 +240,21 @@ class PlaybackFailedHandler(AbstractRequestHandler):
 class NextCommandIssuedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("PlaybackController.NextCommandIssued")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In NextCommandIssued")
-        
+
 class PreviousCommandIssuedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("PlaybackController.PreviousCommandIssued")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In PreviousCommandIssued")
-        
+
 class PlayCommandIssuedHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return is_request_type("PlaybackController.PlayCommandIssued")(handler_input)
-    
+
     def handle(self, handler_input):
         logger.info("In PlayCommandIssued")
 
@@ -266,12 +266,12 @@ class PlayKidsTimesHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         logger.info("Play Kids Times")
         url = s3.generate_presigned_url(
-            ClientMethod='get_object',
-            Params={
-                'Bucket': BUCKET_NAME,
-                'Key': SAMPLE_FILE
-            }
-        )
+                ClientMethod='get_object',
+                Params={
+                    'Bucket': BUCKET_NAME,
+                    'Key': SAMPLE_FILE
+                    }
+                )
         return play(handler_input.response_builder, url)
 
 from ask_sdk_model.interfaces.audioplayer import (PlayDirective, PlayBehavior, AudioItem, Stream, StopDirective)
@@ -281,8 +281,8 @@ def play(response_builder, url):
         audio_item = AudioItem(
             stream = Stream(url=url, token="0"),
             metadata = None
-        ))
-    ).set_should_end_session(True)
+            ))
+        ).set_should_end_session(True)
     return response_builder.response
 
 def stop(response_builder):
